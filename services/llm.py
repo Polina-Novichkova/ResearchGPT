@@ -9,19 +9,26 @@ def get_llm_client():
 def get_model_name() -> str:
     return OLLAMA_MODEL
 
+
 def generate_response(prompt: str) -> str:
-    #Отправка запроса локальной модели и возвращание её ответа
     client = get_llm_client()
+
+    print("Отправляем запрос в Ollama...")
 
     response = client.chat(
         model=get_model_name(),
         messages=[
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ]
+            {"role": "user", "content": prompt}
+        ],
+        think=False,
+        format="json",
+        options={
+            "num_predict": 4000,
+            "repeat_penalty": 1.1,
+            "repeat_last_n": 128
+        }
     )
 
-    return response["message"]["content"]
+    print("Ответ от Ollama получен!")
 
+    return response["message"]["content"]

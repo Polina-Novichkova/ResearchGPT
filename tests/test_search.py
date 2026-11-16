@@ -1,6 +1,6 @@
 import time
 from agents.search_agent import run_search_agent
-from agents.planner import create_research_plan
+from agents.planner_agent import create_research_plan
 from services.search_service import search_multiple_queries
 
 def main():

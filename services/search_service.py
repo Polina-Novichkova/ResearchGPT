@@ -2,6 +2,8 @@ import time
 from tavily import TavilyClient
 from core.config import TAVILY_API_KEY
 from concurrent.futures import ThreadPoolExecutor
+from services.url_utils import normalize_url
+
 def get_search_client():
     return TavilyClient(api_key = TAVILY_API_KEY)
 
@@ -26,15 +28,22 @@ def remove_duplicates(results):
     seen_urls = set()
     
     for res in results:
-        url = res['url']
+        url = res.get('url', '').strip()
         
-        if url not in seen_urls:
-            unique_res.append(res)
-            seen_urls.add(url)
+        if not url:
+            continue
+        
+        normalized_url = normalize_url(url)
+        
+        if not normalized_url or normalized_url in seen_urls:
+            continue
+        
+        unique_res.append(res)
+        seen_urls.add(normalized_url)
             
     return unique_res
 
-def search_multiple_queries(subquestions, max_queries: int = 5) -> dict | None:
+def search_multiple_queries(subquestions: list[str], max_queries: int = 5) -> list[dict]:
     all_res = []
     with ThreadPoolExecutor(max_workers=3) as executor:
         responses = executor.map(search_web, subquestions[:max_queries])
